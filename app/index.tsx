@@ -40,6 +40,6 @@ const styles = StyleSheet.create({
   logo: { height: 34, width: 34, opacity: 0.95, marginBottom: 18 },
   title: { color: '#fff', fontFamily: font.semibold, fontSize: 40, letterSpacing: -1.2 },
   tagline: { color: 'rgba(255,255,255,0.72)', fontFamily: font.semibold, fontSize: 11, letterSpacing: 3, marginTop: 12 },
-  actions: { marginTop: 'auto', paddingHorizontal: 26 },
+  actions: { marginTop: 'auto', paddingHorizontal: 32 },
   legal: { color: 'rgba(255,255,255,0.55)', fontFamily: font.regular, fontSize: 11, textAlign: 'center', marginTop: 16, lineHeight: 16 },
 });

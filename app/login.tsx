@@ -26,7 +26,7 @@ export default function Login() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 20, flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 32, paddingBottom: insets.bottom + 20, flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Log into{'\n'}your account</Text>
 
         <View style={styles.field}>
