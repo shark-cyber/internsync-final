@@ -7,21 +7,21 @@ import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import {
-  HankenGrotesk_300Light,
-  HankenGrotesk_400Regular,
-  HankenGrotesk_500Medium,
-  HankenGrotesk_600SemiBold,
-  HankenGrotesk_700Bold,
-} from '@expo-google-fonts/hanken-grotesk';
+  Montserrat_300Light,
+  Montserrat_400Regular,
+  Montserrat_500Medium,
+  Montserrat_600SemiBold,
+  Montserrat_700Bold,
+} from '@expo-google-fonts/montserrat';
 import { colors } from '../src/theme';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    Hanken_300Light: HankenGrotesk_300Light,
-    Hanken_400Regular: HankenGrotesk_400Regular,
-    Hanken_500Medium: HankenGrotesk_500Medium,
-    Hanken_600SemiBold: HankenGrotesk_600SemiBold,
-    Hanken_700Bold: HankenGrotesk_700Bold,
+    Montserrat_300Light,
+    Montserrat_400Regular,
+    Montserrat_500Medium,
+    Montserrat_600SemiBold,
+    Montserrat_700Bold,
   });
   const { width, height } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';

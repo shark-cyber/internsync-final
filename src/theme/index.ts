@@ -26,11 +26,11 @@ export const colors = {
 export const radius = { sm: 12, md: 16, lg: 20, xl: 28, pill: 999 };
 
 export const font = {
-  light: 'Hanken_300Light',
-  regular: 'Hanken_400Regular',
-  medium: 'Hanken_500Medium',
-  semibold: 'Hanken_600SemiBold',
-  bold: 'Hanken_700Bold',
+  light: 'Montserrat_300Light',
+  regular: 'Montserrat_400Regular',
+  medium: 'Montserrat_500Medium',
+  semibold: 'Montserrat_600SemiBold',
+  bold: 'Montserrat_700Bold',
 };
 
 export type Accent = 'internship' | 'scholarship' | 'extracurricular';
