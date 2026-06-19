@@ -16,7 +16,7 @@ export default function Login() {
 
   return (
     <ImageBackground source={require('../assets/img/welcome-bg.jpg')} style={{ flex: 1, backgroundColor: colors.bg }}>
-      <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
       <LinearGradient pointerEvents="none" colors={['rgba(8,8,10,0.5)', 'rgba(8,8,10,0.35)', 'rgba(8,8,10,0.8)']} style={StyleSheet.absoluteFill} />
 
       <View style={[styles.top, { paddingTop: insets.top + 6 }]}>
