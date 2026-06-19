@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ImageBackground, StyleSheet, Pressable, TextInput, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, Pressable, TextInput, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,7 +15,8 @@ export default function Login() {
   const go = () => router.replace('/home');
 
   return (
-    <ImageBackground source={require('../assets/img/welcome-bg.jpg')} style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <Image source={require('../assets/img/welcome-bg.jpg')} style={styles.bgImg} resizeMode="cover" />
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
       <LinearGradient pointerEvents="none" colors={['rgba(8,8,10,0.5)', 'rgba(8,8,10,0.35)', 'rgba(8,8,10,0.8)']} style={StyleSheet.absoluteFill} />
 
@@ -54,11 +55,12 @@ export default function Login() {
         <View style={{ flex: 1 }} />
         <Text style={styles.switch}>Don't have an account? <Text style={styles.link} onPress={() => router.replace('/signup')}>Sign Up</Text></Text>
       </ScrollView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  bgImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
   top: { paddingHorizontal: 18 },
   x: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
   title: { color: '#fff', fontFamily: font.bold, fontSize: 30, letterSpacing: -0.6, lineHeight: 36, marginTop: 24, marginBottom: 34 },

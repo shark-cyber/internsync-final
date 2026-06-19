@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ImageBackground, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,11 +10,12 @@ export default function Welcome() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   return (
-    <ImageBackground source={require('../assets/img/welcome-bg.jpg')} style={styles.bg}>
+    <View style={styles.bg}>
+      <Image source={require('../assets/img/welcome-bg.jpg')} style={styles.bgImg} resizeMode="cover" />
       <LinearGradient
         pointerEvents="none"
-        colors={['rgba(10,10,12,0.55)', 'rgba(10,10,12,0.05)', 'rgba(10,10,12,0.5)', 'rgba(10,10,12,0.95)']}
-        locations={[0, 0.3, 0.62, 1]}
+        colors={['rgba(10,10,12,0.5)', 'rgba(10,10,12,0)', 'rgba(10,10,12,0)', 'rgba(10,10,12,0.55)', 'rgba(10,10,12,0.95)']}
+        locations={[0, 0.18, 0.6, 0.82, 1]}
         style={StyleSheet.absoluteFill}
       />
       <View style={[styles.top, { paddingTop: insets.top + 14 }]}>
@@ -28,12 +29,13 @@ export default function Welcome() {
         <GlassButton label="Sign up" onPress={() => router.push('/signup')} />
         <Text style={styles.legal}>By continuing you agree to our Terms of Service and Privacy Policy</Text>
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   bg: { flex: 1, backgroundColor: colors.bg },
+  bgImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
   top: { alignItems: 'center', paddingHorizontal: 24 },
   logo: { height: 34, width: 34, opacity: 0.95, marginBottom: 18 },
   title: { color: '#fff', fontFamily: font.semibold, fontSize: 40, letterSpacing: -1.2 },

@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   dot: { position: 'absolute', top: 9, right: 10, width: 7, height: 7, borderRadius: 4, backgroundColor: '#f43f5e', borderWidth: 1.5, borderColor: colors.bg },
   deck: { flex: 1, padding: 16 },
   card: { flex: 1, borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: colors.hairline, zIndex: 1 },
-  empty: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  empty: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#0d0d11' },
   emptyTitle: { color: '#fff', fontFamily: font.semibold, fontSize: 17 },
   emptySub: { color: colors.textFaint, fontFamily: font.regular, fontSize: 12, marginTop: 8 },
   cardFilter: { position: 'absolute', top: 14, left: 14, width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(18,18,26,0.4)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.28)' },
