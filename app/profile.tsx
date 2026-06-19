@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, ScrollView, Modal, TextInput } from 'react-native';
+import { Portal } from '../src/components/Portal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -107,7 +108,7 @@ export default function Profile() {
       </ScrollView>
 
       {/* settings confirm sheet */}
-      <Modal visible={!!act} transparent animationType="slide" onRequestClose={() => setAct(null)} statusBarTranslucent>
+      <Portal visible={!!act} animationType="slide" onRequestClose={() => setAct(null)}>
         <Pressable style={styles.scrim} onPress={() => setAct(null)}><BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} /></Pressable>
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 18 }]}>
           <View style={styles.pgrip} />
@@ -129,7 +130,7 @@ export default function Profile() {
             </>
           )}
         </View>
-      </Modal>
+      </Portal>
 
       {!!toast && <View style={[styles.toast, { bottom: insets.bottom + 24 }]}><Text style={styles.toastText}>{toast}</Text></View>}
       <Menu visible={menu} onClose={() => setMenu(false)} current="/profile" />

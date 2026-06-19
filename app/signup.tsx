@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { Portal } from '../src/components/Portal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -91,7 +92,7 @@ export default function Signup() {
       </View>
 
       {/* PAYMENT */}
-      <Modal visible={pay} transparent animationType="slide" onRequestClose={() => setPay(false)} statusBarTranslucent>
+      <Portal visible={pay} animationType="slide" onRequestClose={() => setPay(false)}>
         <Pressable style={styles.scrim} onPress={() => setPay(false)} />
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 18 }]}>
           <View style={styles.grip} />
@@ -133,7 +134,7 @@ export default function Signup() {
             </View>
           )}
         </View>
-      </Modal>
+      </Portal>
     </View>
   );
 }

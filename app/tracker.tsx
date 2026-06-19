@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, ScrollView, Modal } from 'react-native';
+import { Portal } from '../src/components/Portal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,7 +50,7 @@ export default function Tracker() {
         ))}
       </ScrollView>
 
-      <Modal visible={detail != null} transparent animationType="slide" onRequestClose={() => setOpenIdx(null)} statusBarTranslucent>
+      <Portal visible={detail != null} animationType="slide" onRequestClose={() => setOpenIdx(null)}>
         <View style={[styles.detail, { paddingTop: insets.top }]}>
           <LinearGradient pointerEvents="none" colors={[statusColor[detail?.status ?? 'review'] + '14', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 200 }} />
           <View style={styles.dTop}>
@@ -94,7 +95,7 @@ export default function Tracker() {
             </View>
           )}
         </View>
-      </Modal>
+      </Portal>
 
       <Menu visible={menu} onClose={() => setMenu(false)} current="/tracker" />
     </View>

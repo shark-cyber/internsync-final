@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Portal } from './Portal';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { colors, font, radius } from '../theme';
@@ -26,7 +27,7 @@ export function Menu({ visible, onClose, current }: { visible: boolean; onClose:
   );
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+    <Portal visible={visible} animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.scrim} onPress={onClose}>
         <BlurView intensity={28} tint="dark" style={StyleSheet.absoluteFill} />
       </Pressable>
@@ -43,7 +44,7 @@ export function Menu({ visible, onClose, current }: { visible: boolean; onClose:
           </Pressable>
         </View>
       </View>
-    </Modal>
+    </Portal>
   );
 }
 

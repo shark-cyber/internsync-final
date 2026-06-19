@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView, Modal } from 'react-native';
+import { Portal } from '../src/components/Portal';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -54,7 +55,7 @@ export default function Saved() {
         <Pressable style={styles.filterBtn}><Ionicons name="options-outline" size={18} color="#fff" /></Pressable>
       </View>
 
-      <Modal visible={!!detail} transparent animationType="slide" onRequestClose={() => setDetail(null)} statusBarTranslucent>
+      <Portal visible={!!detail} animationType="slide" onRequestClose={() => setDetail(null)}>
         <Pressable style={styles.scrim} onPress={() => setDetail(null)}><BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} /></Pressable>
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 18 }]}>
           <View style={styles.grip} />
@@ -71,7 +72,7 @@ export default function Saved() {
             </>
           )}
         </View>
-      </Modal>
+      </Portal>
 
       <Menu visible={menu} onClose={() => setMenu(false)} current="/saved" />
     </View>

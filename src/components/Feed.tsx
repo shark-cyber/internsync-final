@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, Pressable, Image, Animated, PanResponder, useWindowDimensions, Modal, ScrollView, TextInput,
 } from 'react-native';
+import { Portal } from './Portal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -79,8 +80,6 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* glow */}
-      <LinearGradient colors={[accentCol + '00', accentCol + '22', accentCol + '00']} style={styles.glow} pointerEvents="none" />
 
       {/* header */}
       <View style={styles.header}>
@@ -114,7 +113,7 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
             {card.img ? (
               <Image source={card.img} style={StyleSheet.absoluteFill} resizeMode="cover" />
             ) : (
-              <LinearGradient colors={['#3b3b46', '#17171c']} style={StyleSheet.absoluteFill} />
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1a1a22' }]} />
             )}
             <LinearGradient
               pointerEvents="none"
@@ -218,7 +217,7 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
 function Sheet({ visible, onClose, title, children }: { visible: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    <Portal visible={visible} animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.sheetScrim} onPress={onClose}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
       </Pressable>
@@ -227,7 +226,7 @@ function Sheet({ visible, onClose, title, children }: { visible: boolean; onClos
         <Text style={styles.sheetTitle}>{title}</Text>
         <ScrollView style={{ marginTop: 12 }}>{children}</ScrollView>
       </View>
-    </Modal>
+    </Portal>
   );
 }
 
