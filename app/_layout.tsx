@@ -1,10 +1,10 @@
 import 'react-native-gesture-handler';
 import React from 'react';
+import { Platform, View, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
 import { useFonts } from 'expo-font';
 import {
   HankenGrotesk_300Light,
@@ -23,32 +23,51 @@ export default function RootLayout() {
     Hanken_600SemiBold: HankenGrotesk_600SemiBold,
     Hanken_700Bold: HankenGrotesk_700Bold,
   });
+  const { height } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
 
   if (!loaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <SafeAreaProvider>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.bg },
-            animation: 'slide_from_right',
+  const content = (
+    <SafeAreaProvider>
+      <StatusBar style="light" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+          animation: 'slide_from_right',
+        }}
+      />
+    </SafeAreaProvider>
+  );
+
+  // On web, frame the app at phone size so it previews like a device.
+  if (isWeb) {
+    const frameH = Math.min(height - 24, 900);
+    return (
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center' }}>
+        <View
+          style={{
+            width: 412,
+            height: frameH,
+            backgroundColor: colors.bg,
+            borderRadius: 40,
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.12)',
+            // @ts-ignore web-only shadow
+            boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
           }}
         >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="signup" />
-          <Stack.Screen name="home" />
-          <Stack.Screen name="scholarships" />
-          <Stack.Screen name="extracurriculars" />
-          <Stack.Screen name="saved" />
-          <Stack.Screen name="tracker" />
-          <Stack.Screen name="profile" />
-          <Stack.Screen name="application" />
-        </Stack>
-      </SafeAreaProvider>
+          {content}
+        </View>
+      </GestureHandlerRootView>
+    );
+  }
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
+      {content}
     </GestureHandlerRootView>
   );
 }

@@ -11,6 +11,7 @@ import { colors, font, radius, Accent } from '../theme';
 import { Opportunity, notifications } from '../data/feed';
 import { Menu } from './Menu';
 import { Chip } from './ui';
+import { Glow } from './Glow';
 
 const { width } = Dimensions.get('window');
 const THRESHOLD = 110;
@@ -43,6 +44,7 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
   const [info, setInfo] = useState(false);
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState('');
+  const [deck, setDeck] = useState<{ width: number; height: number } | null>(null);
   const pos = useRef(new Animated.ValueXY()).current;
   const accentCol = accentHex[accent];
   const card = data[idx];
@@ -91,7 +93,14 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
       </View>
 
       {/* deck */}
-      <View style={styles.deck}>
+      <View style={styles.deck} onLayout={(e) => setDeck(e.nativeEvent.layout)}>
+        {deck && (
+          <Glow
+            width={deck.width}
+            height={deck.height}
+            rect={{ x: 16, y: 16, w: deck.width - 32, h: deck.height - 32, r: 28 }}
+          />
+        )}
         {!card ? (
           <View style={[styles.card, styles.empty, { borderColor: accentCol + '55' }]}>
             <Text style={styles.emptyTitle}>You're all caught up</Text>
@@ -228,7 +237,7 @@ const styles = StyleSheet.create({
   iconBtn: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   dot: { position: 'absolute', top: 9, right: 10, width: 7, height: 7, borderRadius: 4, backgroundColor: '#f43f5e', borderWidth: 1.5, borderColor: colors.bg },
   deck: { flex: 1, padding: 16 },
-  card: { flex: 1, borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: colors.hairline },
+  card: { flex: 1, borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: colors.hairline, zIndex: 1 },
   empty: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
   emptyTitle: { color: '#fff', fontFamily: font.semibold, fontSize: 17 },
   emptySub: { color: colors.textFaint, fontFamily: font.regular, fontSize: 12, marginTop: 8 },

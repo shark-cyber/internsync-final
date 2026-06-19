@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, font, radius } from '../src/theme';
 import { applications as initialApps, Application, Status } from '../src/data/feed';
 import { Menu } from '../src/components/Menu';
+import { Glow } from '../src/components/Glow';
 
 const statusColor: Record<Status, string> = { accepted: colors.green, confirmed: colors.green, review: colors.amber, rejected: colors.red };
 const statusIcon: Record<Status, any> = { accepted: 'checkmark', confirmed: 'checkmark', review: 'time-outline', rejected: 'close' };
@@ -14,6 +15,7 @@ const statusLabel: Record<Status, string> = { accepted: 'Accepted', confirmed: '
 export default function Tracker() {
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState(false);
+  const [sb, setSb] = useState<{ width: number; height: number } | null>(null);
   const [apps, setApps] = useState<Application[]>(initialApps);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const detail = openIdx != null ? apps[openIdx] : null;
