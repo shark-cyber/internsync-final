@@ -51,7 +51,7 @@ export default function Tracker() {
 
       <Modal visible={detail != null} transparent animationType="slide" onRequestClose={() => setOpenIdx(null)} statusBarTranslucent>
         <View style={[styles.detail, { paddingTop: insets.top }]}>
-          <LinearGradient colors={[statusColor[detail?.status ?? 'review'] + '14', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 200 }} />
+          <LinearGradient pointerEvents="none" colors={[statusColor[detail?.status ?? 'review'] + '14', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 200 }} />
           <View style={styles.dTop}>
             <Pressable style={styles.iconBtn} onPress={() => setOpenIdx(null)}><Ionicons name="chevron-back" size={20} color="#fff" /></Pressable>
             <Text style={styles.dTopTitle}>Application</Text>

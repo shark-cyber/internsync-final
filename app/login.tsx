@@ -21,7 +21,7 @@ export default function Login() {
   const go = () => router.replace('/home');
   return (
     <ImageBackground source={require('../assets/img/welcome-bg.jpg')} style={{ flex: 1, backgroundColor: colors.bg }}>
-      <LinearGradient colors={['rgba(8,8,10,0.5)', 'rgba(8,8,10,0)']} locations={[0, 0.34]} style={StyleSheet.absoluteFill} />
+      <LinearGradient pointerEvents="none" colors={['rgba(8,8,10,0.5)', 'rgba(8,8,10,0)']} locations={[0, 0.34]} style={StyleSheet.absoluteFill} />
       <View style={[styles.top, { paddingTop: insets.top + 6 }]}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="close" size={26} color="#fff" />

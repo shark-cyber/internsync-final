@@ -50,7 +50,7 @@ export default function Profile() {
     <View style={styles.root}>
       {photo ? <Image source={{ uri: photo }} style={StyleSheet.absoluteFill} resizeMode="cover" />
              : <View style={StyleSheet.absoluteFill}><View style={styles.initWrap}><Text style={styles.init}>EA</Text></View></View>}
-      <LinearGradient colors={['rgba(6,6,9,0.55)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 130 }} />
+      <LinearGradient pointerEvents="none" colors={['rgba(6,6,9,0.55)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 130 }} />
 
       <View style={[styles.top, { paddingTop: insets.top + 4 }]}>
         <Pressable style={styles.iconBtn} onPress={() => router.replace('/home')}><Ionicons name="chevron-back" size={20} color="#fff" /></Pressable>
@@ -60,12 +60,12 @@ export default function Profile() {
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: 200 }} showsVerticalScrollIndicator={false}>
         <View style={styles.spacer}>
-          <LinearGradient colors={['transparent', 'rgba(8,8,10,0.2)', 'rgba(8,8,10,0.9)']} locations={[0.4, 0.6, 1]} style={StyleSheet.absoluteFill} />
+          <LinearGradient pointerEvents="none" colors={['transparent', 'rgba(8,8,10,0.2)', 'rgba(8,8,10,0.9)']} locations={[0.4, 0.6, 1]} style={StyleSheet.absoluteFill} />
           <View style={styles.who}><Text style={styles.name}>Emelyn Angga</Text><Text style={styles.role}>UX Designer · UX Researcher</Text></View>
           <Pressable style={styles.cam} onPress={pickPhoto}><Ionicons name="camera-outline" size={18} color="#fff" /></Pressable>
         </View>
 
-        <View style={styles.panel}>
+        <BlurView intensity={50} tint="dark" style={styles.panel}>
           <View style={styles.pgrip} />
           <Section icon="person-outline" title="Bio" action={<EditBtn />}>
             <Text style={styles.pText}>UX designer and researcher focused on clean, human-centred products. I love turning messy problems into simple, delightful flows.</Text>
@@ -103,7 +103,7 @@ export default function Profile() {
             </View>
           </Section>
           <View style={{ height: insets.bottom + 24 }} />
-        </View>
+        </BlurView>
       </ScrollView>
 
       {/* settings confirm sheet */}
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   name: { color: '#fff', fontFamily: font.semibold, fontSize: 23, letterSpacing: -0.5 },
   role: { color: 'rgba(255,255,255,0.78)', fontFamily: font.regular, fontSize: 12, marginTop: 3 },
   cam: { position: 'absolute', right: 18, bottom: 16, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(20,20,24,0.6)', borderWidth: 1, borderColor: colors.borderStrong },
-  panel: { backgroundColor: 'rgba(20,20,24,0.92)', borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.14)', paddingHorizontal: 16, paddingTop: 8, minHeight: 600 },
+  panel: { backgroundColor: 'rgba(20,20,24,0.55)', borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.14)', paddingHorizontal: 16, paddingTop: 8, minHeight: 600, overflow: 'hidden' },
   pgrip: { width: 38, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.28)', alignSelf: 'center', marginVertical: 10 },
   section: { borderTopWidth: 1, borderColor: colors.hairline, paddingVertical: 16 },
   secHead: { flexDirection: 'row', alignItems: 'center', gap: 9 },

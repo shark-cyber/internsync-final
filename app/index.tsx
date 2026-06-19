@@ -12,6 +12,7 @@ export default function Welcome() {
   return (
     <ImageBackground source={require('../assets/img/welcome-bg.jpg')} style={styles.bg}>
       <LinearGradient
+        pointerEvents="none"
         colors={['rgba(10,10,12,0.55)', 'rgba(10,10,12,0.05)', 'rgba(10,10,12,0.5)', 'rgba(10,10,12,0.95)']}
         locations={[0, 0.3, 0.62, 1]}
         style={StyleSheet.absoluteFill}

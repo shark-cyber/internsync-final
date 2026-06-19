@@ -117,6 +117,7 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
               <LinearGradient colors={['#3b3b46', '#17171c']} style={StyleSheet.absoluteFill} />
             )}
             <LinearGradient
+              pointerEvents="none"
               colors={['transparent', 'rgba(5,5,8,0.3)', 'rgba(5,5,8,0.96)']}
               locations={[0.35, 0.55, 1]}
               style={StyleSheet.absoluteFill}
