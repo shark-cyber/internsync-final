@@ -167,7 +167,7 @@ const Row = ({ k, v, total }: any) => (
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  top: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 10 },
+  top: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 10 },
   iconBtn: { width: 36, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   bar: { flex: 1, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.14)' },
   barFill: { height: 4, borderRadius: 2, backgroundColor: '#fff' },

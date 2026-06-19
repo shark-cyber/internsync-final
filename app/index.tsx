@@ -18,7 +18,7 @@ export default function Welcome() {
         locations={[0, 0.18, 0.6, 0.82, 1]}
         style={StyleSheet.absoluteFill}
       />
-      <View style={[styles.top, { paddingTop: insets.top + 14 }]}>
+      <View style={[styles.top, { paddingTop: insets.top + 26 }]}>
         <Image source={require('../assets/img/logo-white.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Welcome</Text>
         <Text style={styles.tagline}>YOUR JOURNEY STARTS HERE</Text>

@@ -20,7 +20,7 @@ export default function Login() {
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
       <LinearGradient pointerEvents="none" colors={['rgba(8,8,10,0.5)', 'rgba(8,8,10,0.35)', 'rgba(8,8,10,0.8)']} style={StyleSheet.absoluteFill} />
 
-      <View style={[styles.top, { paddingTop: insets.top + 6 }]}>
+      <View style={[styles.top, { paddingTop: insets.top + 16 }]}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.x}>
           <Ionicons name="close" size={22} color="#fff" />
         </Pressable>
@@ -61,7 +61,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   bgImg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
-  top: { paddingHorizontal: 18 },
+  top: { paddingHorizontal: 26 },
   x: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
   title: { color: '#fff', fontFamily: font.bold, fontSize: 30, letterSpacing: -0.6, lineHeight: 36, marginTop: 24, marginBottom: 34 },
   field: { borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.35)', marginBottom: 26, flexDirection: 'row', alignItems: 'center' },

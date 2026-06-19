@@ -233,7 +233,7 @@ function Sheet({ visible, onClose, title, children }: { visible: boolean; onClos
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   glow: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 260 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 8 },
   iconBtn: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   dot: { position: 'absolute', top: 9, right: 10, width: 7, height: 7, borderRadius: 4, backgroundColor: '#f43f5e', borderWidth: 1.5, borderColor: colors.bg },
   deck: { flex: 1, padding: 16 },

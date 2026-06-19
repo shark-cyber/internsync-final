@@ -53,8 +53,8 @@ export default function Profile() {
              : <View style={StyleSheet.absoluteFill}><View style={styles.initWrap}><Text style={styles.init}>EA</Text></View></View>}
       <LinearGradient pointerEvents="none" colors={['rgba(6,6,9,0.55)', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 130 }} />
 
-      <BlurView intensity={40} tint="dark" pointerEvents="none" style={[styles.headerBlur, { height: insets.top + 50 }]} />
-      <View style={[styles.top, { paddingTop: insets.top + 4 }]}>
+      <BlurView intensity={40} tint="dark" pointerEvents="none" style={[styles.headerBlur, { height: insets.top + 62 }]} />
+      <View style={[styles.top, { paddingTop: insets.top + 16 }]}>
         <Pressable style={styles.iconBtn} onPress={() => router.replace('/home')}><Ionicons name="chevron-back" size={20} color="#fff" /></Pressable>
         <Text style={styles.topTitle}>Profile</Text>
         <Pressable style={styles.iconBtn} onPress={() => setMenu(true)}><Ionicons name="menu" size={18} color="#fff" /></Pressable>
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   initWrap: { position: 'absolute', top: 70, left: 0, right: 0, height: 150, alignItems: 'center', justifyContent: 'center' },
   init: { color: 'rgba(255,255,255,0.92)', fontFamily: font.semibold, fontSize: 62, letterSpacing: 3 },
   headerBlur: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 4 },
-  top: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 6 },
+  top: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 6 },
   iconBtn: { width: 36, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(20,20,24,0.5)', borderWidth: 1, borderColor: colors.borderStrong },
   topTitle: { color: '#fff', fontFamily: font.semibold, fontSize: 14 },
   spacer: { height: 218, justifyContent: 'flex-end' },
