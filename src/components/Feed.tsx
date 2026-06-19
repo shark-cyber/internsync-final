@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, Pressable, Image, Animated, PanResponder, Dimensions, Modal, ScrollView, TextInput,
+  View, Text, StyleSheet, Pressable, Image, Animated, PanResponder, useWindowDimensions, Modal, ScrollView, TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -13,8 +13,6 @@ import { Menu } from './Menu';
 import { Chip } from './ui';
 import { Glow } from './Glow';
 
-const { width } = Dimensions.get('window');
-const THRESHOLD = 110;
 const accentHex: Record<Accent, string> = {
   internship: colors.internship, scholarship: colors.scholarship, extracurricular: colors.extracurricular,
 };
@@ -37,6 +35,8 @@ const filtersFor: Record<Accent, { label: string; opts: string[] }[]> = {
 
 export default function Feed({ data, accent, current }: { data: Opportunity[]; accent: Accent; current: string }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const THRESHOLD = Math.max(90, width * 0.26);
   const [idx, setIdx] = useState(0);
   const [menu, setMenu] = useState(false);
   const [notif, setNotif] = useState(false);

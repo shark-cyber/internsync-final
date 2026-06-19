@@ -23,8 +23,9 @@ export default function RootLayout() {
     Hanken_600SemiBold: HankenGrotesk_600SemiBold,
     Hanken_700Bold: HankenGrotesk_700Bold,
   });
-  const { height } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
+  const isTablet = width >= 700;
 
   if (!loaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
@@ -61,6 +62,15 @@ export default function RootLayout() {
         >
           {content}
         </View>
+      </GestureHandlerRootView>
+    );
+  }
+
+  // On tablets / large screens, keep the phone-first UI centered at a sane width.
+  if (isTablet) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000', alignItems: 'center' }}>
+        <View style={{ flex: 1, width: 480, maxWidth: '100%', backgroundColor: colors.bg }}>{content}</View>
       </GestureHandlerRootView>
     );
   }
