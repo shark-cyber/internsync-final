@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { Portal } from '../src/components/Portal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, font, radius } from '../src/theme';
 
@@ -13,7 +13,8 @@ const INTERESTS = ['Software', 'Engineering', 'Design', 'Product', 'Data & AI', 
 export default function Signup() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [i, setI] = useState(0);
+  const sp = useLocalSearchParams<{ step?: string }>();
+  const [i, setI] = useState(sp.step ? Math.min(STEPS.length - 1, Math.max(0, parseInt(sp.step) || 0)) : 0);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [picked, setPicked] = useState<Record<string, boolean>>({ Internship: true });
@@ -172,9 +173,9 @@ const styles = StyleSheet.create({
   barFill: { height: 4, borderRadius: 2, backgroundColor: '#fff' },
   h1: { color: '#fff', fontFamily: font.bold, fontSize: 25, letterSpacing: -0.5 },
   sub: { color: colors.textDim, fontFamily: font.regular, fontSize: 13, marginTop: 10, lineHeight: 19 },
-  input: { height: 54, borderRadius: 14, paddingHorizontal: 16, marginBottom: 13, color: '#fff', fontFamily: font.regular, fontSize: 15, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  input: { height: 54, minWidth: 0, borderRadius: 14, paddingHorizontal: 16, marginBottom: 13, color: '#fff', fontFamily: font.regular, fontSize: 15, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   codeRow: { flexDirection: 'row', gap: 9 },
-  codeBox: { flex: 1, height: 56, borderRadius: 13, textAlign: 'center', color: '#fff', fontFamily: font.semibold, fontSize: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  codeBox: { flex: 1, minWidth: 0, height: 56, borderRadius: 13, textAlign: 'center', color: '#fff', fontFamily: font.semibold, fontSize: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   glabel: { color: colors.textFaint, fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.4, marginTop: 10, marginBottom: 10 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
   chip: { paddingVertical: 9, paddingHorizontal: 15, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong },
@@ -184,13 +185,13 @@ const styles = StyleSheet.create({
   ctaText: { color: '#fff', fontFamily: font.bold, fontSize: 15 },
   fine: { color: colors.textFaint, fontFamily: font.regular, fontSize: 10.5, textAlign: 'center', marginTop: 12 },
   // plan
-  plan: { flex: 1, borderRadius: 22, padding: 18, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border },
+  plan: { flex: 1, minWidth: 0, minHeight: 210, borderRadius: 24, paddingVertical: 26, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border },
   planOn: { backgroundColor: '#232327', borderColor: colors.internship },
-  badge: { position: 'absolute', top: -10, backgroundColor: colors.internship, paddingVertical: 3, paddingHorizontal: 9, borderRadius: 10 },
-  badgeText: { color: '#fff', fontFamily: font.bold, fontSize: 9, letterSpacing: 0.4 },
-  planName: { color: '#fff', fontFamily: font.bold, fontSize: 16 },
-  planPrice: { color: '#fff', fontFamily: font.bold, fontSize: 26, marginTop: 4, letterSpacing: -1 },
-  planDesc: { color: colors.textDim, fontFamily: font.regular, fontSize: 11, textAlign: 'center', marginTop: 6, lineHeight: 15 },
+  badge: { position: 'absolute', top: -11, backgroundColor: colors.internship, paddingVertical: 4, paddingHorizontal: 10, borderRadius: 11 },
+  badgeText: { color: '#fff', fontFamily: font.bold, fontSize: 9.5, letterSpacing: 0.4 },
+  planName: { color: '#fff', fontFamily: font.bold, fontSize: 17 },
+  planPrice: { color: '#fff', fontFamily: font.bold, fontSize: 32, marginTop: 6, letterSpacing: -1 },
+  planDesc: { color: colors.textDim, fontFamily: font.regular, fontSize: 11.5, textAlign: 'center', marginTop: 8, lineHeight: 16 },
   // done
   doneWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 34 },
   doneTitle: { color: '#fff', fontFamily: font.bold, fontSize: 27, letterSpacing: -0.6, textAlign: 'center' },
