@@ -49,7 +49,7 @@ export default function Application() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  top: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8 },
+  top: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 8 },
   iconBtn: { width: 36, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   title: { color: '#fff', fontFamily: font.bold, fontSize: 15, letterSpacing: 0.3 },
   fld: { height: 52, borderRadius: 14, paddingHorizontal: 16, marginBottom: 13, color: '#fff', fontFamily: font.regular, fontSize: 13, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },

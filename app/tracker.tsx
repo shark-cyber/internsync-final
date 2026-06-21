@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, ScrollView, Modal } from 'react-native';
+import { Portal } from '../src/components/Portal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, font, radius } from '../src/theme';
 import { applications as initialApps, Application, Status } from '../src/data/feed';
 import { Menu } from '../src/components/Menu';
+import { Glow } from '../src/components/Glow';
 
 const statusColor: Record<Status, string> = { accepted: colors.green, confirmed: colors.green, review: colors.amber, rejected: colors.red };
 const statusIcon: Record<Status, any> = { accepted: 'checkmark', confirmed: 'checkmark', review: 'time-outline', rejected: 'close' };
@@ -14,6 +16,7 @@ const statusLabel: Record<Status, string> = { accepted: 'Accepted', confirmed: '
 export default function Tracker() {
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState(false);
+  const [sb, setSb] = useState<{ width: number; height: number } | null>(null);
   const [apps, setApps] = useState<Application[]>(initialApps);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const detail = openIdx != null ? apps[openIdx] : null;
@@ -47,9 +50,9 @@ export default function Tracker() {
         ))}
       </ScrollView>
 
-      <Modal visible={detail != null} transparent animationType="slide" onRequestClose={() => setOpenIdx(null)} statusBarTranslucent>
+      <Portal visible={detail != null} animationType="slide" onRequestClose={() => setOpenIdx(null)}>
         <View style={[styles.detail, { paddingTop: insets.top }]}>
-          <LinearGradient colors={[statusColor[detail?.status ?? 'review'] + '14', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 200 }} />
+          <LinearGradient pointerEvents="none" colors={[statusColor[detail?.status ?? 'review'] + '14', 'transparent']} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 200 }} />
           <View style={styles.dTop}>
             <Pressable style={styles.iconBtn} onPress={() => setOpenIdx(null)}><Ionicons name="chevron-back" size={20} color="#fff" /></Pressable>
             <Text style={styles.dTopTitle}>Application</Text>
@@ -92,7 +95,7 @@ export default function Tracker() {
             </View>
           )}
         </View>
-      </Modal>
+      </Portal>
 
       <Menu visible={menu} onClose={() => setMenu(false)} current="/tracker" />
     </View>
@@ -101,7 +104,7 @@ export default function Tracker() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 8 },
   iconBtn: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   htitle: { color: '#fff', fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.3 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 11, borderRadius: 18, marginBottom: 9, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },

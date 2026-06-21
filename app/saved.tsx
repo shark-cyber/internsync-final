@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView, Modal } from 'react-native';
+import { Portal } from '../src/components/Portal';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, font, radius } from '../src/theme';
 import { savedItems, Saved as SavedT } from '../src/data/feed';
 import { Menu } from '../src/components/Menu';
+import { Glow } from '../src/components/Glow';
 
 export default function Saved() {
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState(false);
+  const [sb, setSb] = useState<{ width: number; height: number } | null>(null);
   const [q, setQ] = useState('');
   const [detail, setDetail] = useState<SavedT | null>(null);
   const [unsaved, setUnsaved] = useState<Record<string, boolean>>({});
@@ -42,14 +45,17 @@ export default function Saved() {
       </ScrollView>
 
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 10 }]}>
+        <View style={{ flex: 1 }} onLayout={(e) => setSb(e.nativeEvent.layout)}>
+          {sb && <Glow width={sb.width} height={sb.height} rect={{ x: 0, y: 0, w: sb.width, h: sb.height, r: 21 }} blur={12} />}
         <View style={styles.search}>
           <Ionicons name="search" size={16} color={colors.textDim} />
           <TextInput value={q} onChangeText={setQ} placeholder="Search saved…" placeholderTextColor={colors.textFaint} style={styles.searchInput} />
         </View>
+        </View>
         <Pressable style={styles.filterBtn}><Ionicons name="options-outline" size={18} color="#fff" /></Pressable>
       </View>
 
-      <Modal visible={!!detail} transparent animationType="slide" onRequestClose={() => setDetail(null)} statusBarTranslucent>
+      <Portal visible={!!detail} animationType="slide" onRequestClose={() => setDetail(null)}>
         <Pressable style={styles.scrim} onPress={() => setDetail(null)}><BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} /></Pressable>
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 18 }]}>
           <View style={styles.grip} />
@@ -66,7 +72,7 @@ export default function Saved() {
             </>
           )}
         </View>
-      </Modal>
+      </Portal>
 
       <Menu visible={menu} onClose={() => setMenu(false)} current="/saved" />
     </View>
@@ -75,7 +81,7 @@ export default function Saved() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 8 },
   iconBtn: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   htitle: { color: '#fff', fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.3 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 11, borderRadius: radius.lg, marginBottom: 10, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
@@ -87,7 +93,7 @@ const styles = StyleSheet.create({
   book: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border },
   empty: { color: colors.textFaint, fontFamily: font.regular, fontSize: 13, textAlign: 'center', paddingTop: 40 },
   bottom: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 24, paddingTop: 6 },
-  search: { flex: 1, height: 42, borderRadius: 21, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border },
+  search: { height: 42, borderRadius: 21, zIndex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, backgroundColor: '#0e0e12', borderWidth: 1, borderColor: colors.border },
   searchInput: { flex: 1, color: '#fff', fontFamily: font.regular, fontSize: 13 },
   filterBtn: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.borderStrong },
   scrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(6,6,10,0.45)' },

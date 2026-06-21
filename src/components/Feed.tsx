@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, Pressable, Image, Animated, PanResponder, Dimensions, Modal, ScrollView, TextInput,
+  View, Text, StyleSheet, Pressable, Image, Animated, PanResponder, useWindowDimensions, Modal, ScrollView, TextInput,
 } from 'react-native';
+import { Portal } from './Portal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,9 +12,8 @@ import { colors, font, radius, Accent } from '../theme';
 import { Opportunity, notifications } from '../data/feed';
 import { Menu } from './Menu';
 import { Chip } from './ui';
+import { Glow } from './Glow';
 
-const { width } = Dimensions.get('window');
-const THRESHOLD = 110;
 const accentHex: Record<Accent, string> = {
   internship: colors.internship, scholarship: colors.scholarship, extracurricular: colors.extracurricular,
 };
@@ -36,6 +36,8 @@ const filtersFor: Record<Accent, { label: string; opts: string[] }[]> = {
 
 export default function Feed({ data, accent, current }: { data: Opportunity[]; accent: Accent; current: string }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const THRESHOLD = Math.max(90, width * 0.26);
   const [idx, setIdx] = useState(0);
   const [menu, setMenu] = useState(false);
   const [notif, setNotif] = useState(false);
@@ -43,6 +45,7 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
   const [info, setInfo] = useState(false);
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState('');
+  const [deck, setDeck] = useState<{ width: number; height: number } | null>(null);
   const pos = useRef(new Animated.ValueXY()).current;
   const accentCol = accentHex[accent];
   const card = data[idx];
@@ -77,8 +80,6 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* glow */}
-      <LinearGradient colors={[accentCol + '00', accentCol + '22', accentCol + '00']} style={styles.glow} pointerEvents="none" />
 
       {/* header */}
       <View style={styles.header}>
@@ -91,7 +92,14 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
       </View>
 
       {/* deck */}
-      <View style={styles.deck}>
+      <View style={styles.deck} onLayout={(e) => setDeck(e.nativeEvent.layout)}>
+        {deck && (
+          <Glow
+            width={deck.width}
+            height={deck.height}
+            rect={{ x: 16, y: 16, w: deck.width - 32, h: deck.height - 32, r: 28 }}
+          />
+        )}
         {!card ? (
           <View style={[styles.card, styles.empty, { borderColor: accentCol + '55' }]}>
             <Text style={styles.emptyTitle}>You're all caught up</Text>
@@ -105,9 +113,10 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
             {card.img ? (
               <Image source={card.img} style={StyleSheet.absoluteFill} resizeMode="cover" />
             ) : (
-              <LinearGradient colors={['#3b3b46', '#17171c']} style={StyleSheet.absoluteFill} />
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1a1a22' }]} />
             )}
             <LinearGradient
+              pointerEvents="none"
               colors={['transparent', 'rgba(5,5,8,0.3)', 'rgba(5,5,8,0.96)']}
               locations={[0.35, 0.55, 1]}
               style={StyleSheet.absoluteFill}
@@ -208,7 +217,7 @@ export default function Feed({ data, accent, current }: { data: Opportunity[]; a
 function Sheet({ visible, onClose, title, children }: { visible: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    <Portal visible={visible} animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.sheetScrim} onPress={onClose}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
       </Pressable>
@@ -217,19 +226,19 @@ function Sheet({ visible, onClose, title, children }: { visible: boolean; onClos
         <Text style={styles.sheetTitle}>{title}</Text>
         <ScrollView style={{ marginTop: 12 }}>{children}</ScrollView>
       </View>
-    </Modal>
+    </Portal>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   glow: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 260 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 8 },
   iconBtn: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline },
   dot: { position: 'absolute', top: 9, right: 10, width: 7, height: 7, borderRadius: 4, backgroundColor: '#f43f5e', borderWidth: 1.5, borderColor: colors.bg },
   deck: { flex: 1, padding: 16 },
-  card: { flex: 1, borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: colors.hairline },
-  empty: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  card: { flex: 1, borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: colors.hairline, zIndex: 1 },
+  empty: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#0d0d11' },
   emptyTitle: { color: '#fff', fontFamily: font.semibold, fontSize: 17 },
   emptySub: { color: colors.textFaint, fontFamily: font.regular, fontSize: 12, marginTop: 8 },
   cardFilter: { position: 'absolute', top: 14, left: 14, width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(18,18,26,0.4)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.28)' },
