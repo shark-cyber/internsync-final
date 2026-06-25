@@ -393,9 +393,15 @@ export const api = {
       portfolioUrl?: string;
       resumeUrl?: string;
     }, resumeFile?: any) {
-      const formData = new FormData();
+      console.log("createApplication called with data:", data, "resumeFile:", resumeFile);
       
+      const url = buildUrl(API_BASE_URL, `/v1/application/job/${jobId}`);
+      const token = await getAuthToken();
+      
+      let response;
       if (resumeFile) {
+        const formData = new FormData();
+        
         if (Platform.OS === 'web' && resumeFile instanceof File) {
           formData.append('resume', resumeFile);
         } else {
@@ -405,23 +411,47 @@ export const api = {
             name: resumeFile.name || 'resume.pdf',
           } as any);
         }
-      }
-      
-      if (data?.applicantName) formData.append('applicantName', data.applicantName);
-      if (data?.text) formData.append('text', data.text);
-      if (data?.portfolioUrl) formData.append('portfolioUrl', data.portfolioUrl);
-      if (data?.resumeUrl) formData.append('resumeUrl', data.resumeUrl);
+        
+        if (data?.applicantName) {
+          console.log("Appending applicantName:", data.applicantName);
+          formData.append('applicantName', data.applicantName);
+        }
+        if (data?.text) {
+          console.log("Appending text:", data.text);
+          formData.append('text', data.text);
+        }
+        if (data?.portfolioUrl) formData.append('portfolioUrl', data.portfolioUrl);
+        if (data?.resumeUrl) {
+          console.log("Appending resumeUrl:", data.resumeUrl);
+          formData.append('resumeUrl', data.resumeUrl);
+        }
 
-      const url = buildUrl(API_BASE_URL, `/v1/application/job/${jobId}`);
-      const token = await getAuthToken();
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        body: formData,
-      });
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+          body: formData,
+        });
+      } else {
+        // If no file to upload, send JSON instead which might be more reliable
+        const jsonData = {
+          applicantName: data?.applicantName || '',
+          text: data?.text || '',
+          portfolioUrl: data?.portfolioUrl || '',
+          resumeUrl: data?.resumeUrl || '',
+        };
+        console.log("Sending JSON data:", jsonData);
+        
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+          body: JSON.stringify(jsonData),
+        });
+      }
 
       const result = await response.json();
       if (!response.ok) {

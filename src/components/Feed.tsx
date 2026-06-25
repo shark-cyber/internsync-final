@@ -24,6 +24,7 @@ import { Menu } from "./Menu";
 import { Chip } from "./ui";
 import { Glow } from "./Glow";
 import { api } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "expo-router";
 
 // Types for job data
@@ -125,6 +126,7 @@ export default function Feed({
 }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { userProfile } = useAuth();
   const { width } = useWindowDimensions();
   const THRESHOLD = Math.max(90, width * 0.26);
   const [menu, setMenu] = useState(false);
@@ -143,6 +145,7 @@ export default function Feed({
   const [notifications, setNotifications] = useState<Notif[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [limitMessage, setLimitMessage] = useState("");
+  const [resumePromptVisible, setResumePromptVisible] = useState(false);
   const hasUnread = notifications.some((n) => !n.read);
 
   // Helper to format time
@@ -309,8 +312,23 @@ export default function Feed({
 
     try {
       if (action === "apply") {
+        console.log("userProfile:", userProfile);
+        // Check if resume is uploaded first
+        if (!userProfile?.resumeUrl) {
+          setResumePromptVisible(true);
+          resetCardPosition();
+          return;
+        }
+
         // Create application when applying (swipe right or checkmark button)
-        await api.applications.createApplication(currentJob._id);
+        const applicantName = [userProfile?.firstName, userProfile?.lastName]
+          .filter(Boolean)
+          .join(" ");
+        await api.applications.createApplication(currentJob._id, {
+          applicantName,
+          text: "Applying via swiping!", // Default application text
+          resumeUrl: userProfile.resumeUrl,
+        });
         showToast("Application Submitted!");
       } else {
         // Use swipe action for save/like/dislike
@@ -703,6 +721,34 @@ export default function Feed({
             }}
           >
             <Text style={styles.applyText}>Upgrade</Text>
+          </Pressable>
+        </View>
+      </Sheet>
+
+      {/* Resume Upload Prompt */}
+      <Sheet
+        visible={resumePromptVisible}
+        onClose={() => setResumePromptVisible(false)}
+        title="Resume Required"
+      >
+        <Text style={styles.limitBody}>
+          To apply for opportunities, you need to upload your resume first!
+        </Text>
+        <View style={styles.limitActions}>
+          <Pressable
+            style={styles.reset}
+            onPress={() => setResumePromptVisible(false)}
+          >
+            <Text style={styles.resetText}>Maybe later</Text>
+          </Pressable>
+          <Pressable
+            style={styles.applyBtn}
+            onPress={() => {
+              setResumePromptVisible(false);
+              router.push("/profile");
+            }}
+          >
+            <Text style={styles.applyText}>Upload Resume</Text>
           </Pressable>
         </View>
       </Sheet>
