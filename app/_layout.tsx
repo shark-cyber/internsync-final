@@ -14,6 +14,7 @@ import {
   Montserrat_700Bold,
 } from '@expo-google-fonts/montserrat';
 import { colors } from '../src/theme';
+import { AuthProvider } from '../src/contexts/AuthContext';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -30,16 +31,18 @@ export default function RootLayout() {
   if (!loaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   const content = (
-    <SafeAreaProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.bg },
-          animation: 'slide_from_right',
-        }}
-      />
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.bg },
+            animation: 'slide_from_right',
+          }}
+        />
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 
   // On web, frame the app at phone size so it previews like a device.

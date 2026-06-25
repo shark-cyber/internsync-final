@@ -5,12 +5,16 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { colors, font, radius } from '../src/theme';
+import { useAuth } from '../src/contexts/AuthContext';
 
 export default function Application() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { userProfile } = useAuth();
   const [cv, setCv] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+
+  const fullName = [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(' ');
 
   const pickCv = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.6 });
@@ -26,7 +30,7 @@ export default function Application() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 18 }}>
-        <TextInput style={styles.fld} placeholder="Enter full name" placeholderTextColor={colors.textFaint} defaultValue="Emelyn Angga" />
+        <TextInput style={styles.fld} placeholder="Enter full name" placeholderTextColor={colors.textFaint} defaultValue={fullName} />
         <TextInput style={styles.fld} placeholder="Enter portfolio link" placeholderTextColor={colors.textFaint} autoCapitalize="none" />
 
         <Pressable style={[styles.upload, cv && styles.uploadHas]} onPress={pickCv}>
