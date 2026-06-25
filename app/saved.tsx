@@ -75,10 +75,12 @@ export default function Saved() {
     setLoading(true);
     try {
       const result = await api.swipe.getLiked({ limit: 50 });
+      console.log("api.swipe.getLiked returned:", result);
       if (result.success && result.data) {
         const normalizedItems = result.data
           .map((item: any) => {
             const job = item?.job || item?.jobId || item;
+            console.log("Processing item:", item, "job:", job);
             if (!job?._id) return null;
 
             return {
@@ -90,6 +92,7 @@ export default function Saved() {
           })
           .filter(Boolean);
 
+        console.log("Normalized items:", normalizedItems);
         setSavedItems(normalizedItems as SavedItem[]);
       }
     } catch (error: any) {
