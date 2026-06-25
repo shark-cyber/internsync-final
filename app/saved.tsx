@@ -36,7 +36,8 @@ interface Job {
   isRemote?: boolean;
   applicationDeadline?: Date;
   sourceUrl?: string;
-  applyMode?: string;
+  applyMode?: 'external' | 'native';
+  sourceType?: 'csv' | 'web';
 }
 
 interface SavedItem {
@@ -166,7 +167,9 @@ export default function Saved() {
     setBusyJobId(job._id);
     try {
       const sourceUrl = cleanUrl(job.sourceUrl);
-      if (job.applyMode === "external" && sourceUrl) {
+      const isExternal =
+        job.sourceType === "csv" || job.applyMode === "external";
+      if (isExternal && sourceUrl) {
         await Linking.openURL(sourceUrl);
         return;
       }

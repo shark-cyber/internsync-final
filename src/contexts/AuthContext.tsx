@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (!auth.currentUser) return;
     try {
       const res = await api.user.getProfile();
+      console.log("fetchProfile res:", res);
       if (res.success) {
         setUserProfile(res.user);
       }

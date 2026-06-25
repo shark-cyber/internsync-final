@@ -74,7 +74,19 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
 
+  const extractFileNameFromUrl = (url: string) => {
+    try {
+      const path = new URL(url).pathname;
+      const parts = path.split("/");
+      const lastPart = parts[parts.length - 1];
+      return decodeURIComponent(lastPart.split("?")[0].split("#")[0]);
+    } catch {
+      return null;
+    }
+  };
+
   useEffect(() => {
+    console.log("PROFILE USEEFFECT - userProfile:", userProfile);
     if (userProfile?.profilePicture) {
       setPhoto(userProfile.profilePicture);
     }
@@ -86,6 +98,11 @@ export default function Profile() {
     }
     if (userProfile?.resumeFileName) {
       setResumeFileName(userProfile.resumeFileName);
+    } else if (userProfile?.resumeUrl) {
+      const extractedName = extractFileNameFromUrl(userProfile.resumeUrl);
+      if (extractedName) {
+        setResumeFileName(extractedName);
+      }
     }
   }, [userProfile]);
 

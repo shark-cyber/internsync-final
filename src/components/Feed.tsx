@@ -11,6 +11,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Portal } from "./Portal";
@@ -40,6 +41,9 @@ interface Job {
   jobType?: string;
   isRemote?: boolean;
   applicationDeadline?: Date;
+  sourceUrl?: string;
+  applyMode?: "external" | "native";
+  sourceType?: "csv" | "web";
 }
 
 // Type for notification data from API
@@ -312,24 +316,37 @@ export default function Feed({
 
     try {
       if (action === "apply") {
-        console.log("userProfile:", userProfile);
-        // Check if resume is uploaded first
-        if (!userProfile?.resumeUrl) {
-          setResumePromptVisible(true);
-          resetCardPosition();
-          return;
-        }
+        // Check if it's a CSV job or external apply mode
+        const isExternal =
+          currentJob.sourceType === "csv" ||
+          currentJob.applyMode === "external";
+        const cleanSourceUrl = cleanUrl(currentJob.sourceUrl);
+        if (isExternal && cleanSourceUrl) {
+          // Open external URL for CSV/external jobs
+          await Linking.openURL(cleanSourceUrl);
+          // Also mark as "liked" to save it (optional, but helpful)
+          await api.swipe.action(currentJob._id, "like");
+          showToast("Viewing opportunity");
+        } else {
+          console.log("userProfile:", userProfile);
+          // Check if resume is uploaded first for native apply
+          if (!userProfile?.resumeUrl) {
+            setResumePromptVisible(true);
+            resetCardPosition();
+            return;
+          }
 
-        // Create application when applying (swipe right or checkmark button)
-        const applicantName = [userProfile?.firstName, userProfile?.lastName]
-          .filter(Boolean)
-          .join(" ");
-        await api.applications.createApplication(currentJob._id, {
-          applicantName,
-          text: "Applying via swiping!", // Default application text
-          resumeUrl: userProfile.resumeUrl,
-        });
-        showToast("Application Submitted!");
+          // Create application when applying (swipe right or checkmark button)
+          const applicantName = [userProfile?.firstName, userProfile?.lastName]
+            .filter(Boolean)
+            .join(" ");
+          await api.applications.createApplication(currentJob._id, {
+            applicantName,
+            text: "Applying via swiping!", // Default application text
+            resumeUrl: userProfile.resumeUrl,
+          });
+          showToast("Application Submitted!");
+        }
       } else {
         // Use swipe action for save/like/dislike
         await api.swipe.action(currentJob._id, action);
@@ -696,7 +713,15 @@ export default function Feed({
             </Text>
             <Text style={styles.ih}>ABOUT</Text>
             <Text style={styles.ibody}>{displayData.desc}</Text>
-            <Pressable style={styles.visit}>
+            <Pressable
+              style={styles.visit}
+              onPress={async () => {
+                const cleanSourceUrl = cleanUrl(currentJob.sourceUrl);
+                if (cleanSourceUrl) {
+                  await Linking.openURL(cleanSourceUrl);
+                }
+              }}
+            >
               <Text style={styles.visitText}>View opportunity ↗</Text>
             </Pressable>
           </>
