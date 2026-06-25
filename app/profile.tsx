@@ -27,6 +27,12 @@ import { colors, font, radius } from "../src/theme";
 import { Menu } from "../src/components/Menu";
 import { api } from "../src/lib/api";
 import { useAuth } from "../src/contexts/AuthContext";
+import {
+  auth,
+  updateEmail,
+  updatePassword,
+  getFirebaseErrorMessage,
+} from "../src/lib/firebase";
 
 type Act = {
   key: string;
@@ -64,6 +70,9 @@ export default function Profile() {
   // Edit fields
   const [editAboutMe, setEditAboutMe] = useState("");
   const [editHeadline, setEditHeadline] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
 
   useEffect(() => {
     if (userProfile?.profilePicture) {
@@ -74,6 +83,9 @@ export default function Profile() {
     }
     if (userProfile?.headline) {
       setEditHeadline(userProfile.headline);
+    }
+    if (userProfile?.resumeFileName) {
+      setResumeFileName(userProfile.resumeFileName);
     }
   }, [userProfile]);
 
@@ -144,15 +156,18 @@ export default function Profile() {
       if (result.canceled) return;
 
       let fileToUpload;
+      let fileName = "";
       if (Platform.OS === "web") {
         // On web, convert to File
         const asset = result.assets[0];
+        fileName = asset.name;
         const response = await fetch(asset.uri);
         const blob = await response.blob();
         fileToUpload = new File([blob], asset.name, { type: asset.mimeType });
       } else {
         // On native, use URI
         const asset = result.assets[0];
+        fileName = asset.name;
         fileToUpload = {
           uri: asset.uri,
           mimeType: asset.mimeType,
@@ -162,6 +177,7 @@ export default function Profile() {
 
       const uploadResult = await api.user.uploadResume(fileToUpload);
       if (uploadResult.success) {
+        setResumeFileName(fileName);
         await refreshProfile();
         flash("Resume uploaded!");
       }
@@ -219,6 +235,54 @@ export default function Profile() {
     }
   };
 
+  const handleChangeEmail = async () => {
+    if (!newEmail) {
+      Alert.alert("Error", "Please enter a valid email address.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("No user logged in");
+      }
+      await updateEmail(user, newEmail);
+      await refreshProfile();
+      setNewEmail("");
+      flash("Email updated!");
+    } catch (error: any) {
+      console.error("Error updating email:", error);
+      Alert.alert("Error", getFirebaseErrorMessage(error));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 8) {
+      Alert.alert(
+        "Error",
+        "Please enter a password that is at least 8 characters long.",
+      );
+      return;
+    }
+    setSaving(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("No user logged in");
+      }
+      await updatePassword(user, newPassword);
+      setNewPassword("");
+      flash("Password updated!");
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      Alert.alert("Error", getFirebaseErrorMessage(error));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const ACTIONS: Act[] = [
     {
       key: "email",
@@ -226,7 +290,7 @@ export default function Profile() {
       body: "Enter the new email for your account.",
       confirm: "Save",
       cancel: "Cancel",
-      run: () => flash("Email updated"),
+      run: handleChangeEmail,
     },
     {
       key: "password",
@@ -234,7 +298,7 @@ export default function Profile() {
       body: "Set a new password (at least 8 characters).",
       confirm: "Update",
       cancel: "Cancel",
-      run: () => flash("Password updated"),
+      run: handleChangePassword,
     },
     {
       key: "upgrade",
@@ -599,7 +663,9 @@ export default function Profile() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.itemT}>
-                  {userProfile?.resumeUrl ? "Resume" : "No resume uploaded"}
+                  {userProfile?.resumeUrl
+                    ? userProfile.resumeFileName || resumeFileName || "Resume"
+                    : "No resume uploaded"}
                 </Text>
                 <Text style={styles.itemS}>
                   {userProfile?.resumeUrl
@@ -673,6 +739,12 @@ export default function Profile() {
                       placeholderTextColor={colors.textFaint}
                       secureTextEntry={act.key === "password"}
                       style={styles.input}
+                      value={act.key === "email" ? newEmail : newPassword}
+                      onChangeText={
+                        act.key === "email" ? setNewEmail : setNewPassword
+                      }
+                      autoCapitalize="none"
+                      autoCorrect={false}
                     />
                   )}
                   {act.key !== "email" && act.key !== "password" && (

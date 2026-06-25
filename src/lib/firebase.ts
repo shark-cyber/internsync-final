@@ -10,6 +10,8 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateEmail,
+  updatePassword,
   User,
   AuthError,
 } from 'firebase/auth';
@@ -35,7 +37,7 @@ const getFirebaseErrorMessage = (error: AuthError | Error): string => {
       case 'auth/operation-not-allowed':
         return 'Google sign-in is not enabled yet. Please contact support or use email/password.';
       case 'auth/email-already-in-use':
-        return 'This email is already in use. Please log in instead.';
+        return 'This email is already in use. Please use a different email.';
       case 'auth/invalid-email':
         return 'Please enter a valid email address.';
       case 'auth/user-disabled':
@@ -52,6 +54,14 @@ const getFirebaseErrorMessage = (error: AuthError | Error): string => {
         return 'Sign-in popup closed. Please try again.';
       case 'auth/cancelled-popup-request':
         return 'Sign-in cancelled. Please try again.';
+      case 'auth/weak-password':
+        return 'Password is too weak. Please choose a stronger password.';
+      case 'auth/requires-recent-login':
+        return 'For security reasons, please log out and log back in before updating your email or password.';
+      case 'auth/invalid-new-email':
+        return 'The new email address is invalid. Please check and try again.';
+      case 'auth/email-already-exists':
+        return 'This email is already in use by another account. Please use a different email.';
       default:
         return error.message || 'An error occurred during authentication.';
     }
@@ -70,6 +80,8 @@ export {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateEmail,
+  updatePassword,
   User,
   getFirebaseErrorMessage,
 };
