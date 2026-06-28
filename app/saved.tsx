@@ -36,8 +36,8 @@ interface Job {
   isRemote?: boolean;
   applicationDeadline?: Date;
   sourceUrl?: string;
-  applyMode?: 'external' | 'native';
-  sourceType?: 'csv' | 'web';
+  applyMode?: "external" | "native";
+  sourceType?: "csv" | "web";
 }
 
 interface SavedItem {
