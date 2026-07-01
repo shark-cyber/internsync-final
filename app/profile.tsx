@@ -70,9 +70,12 @@ export default function Profile() {
   // Edit fields
   const [editAboutMe, setEditAboutMe] = useState("");
   const [editHeadline, setEditHeadline] = useState("");
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [showAccountPassword, setShowAccountPassword] = useState(false);
 
   const extractFileNameFromUrl = (url: string) => {
     try {
@@ -87,15 +90,15 @@ export default function Profile() {
 
   useEffect(() => {
     console.log("PROFILE USEEFFECT - userProfile:", userProfile);
-    if (userProfile?.profilePicture) {
-      setPhoto(userProfile.profilePicture);
-    }
+    setPhoto(userProfile?.profilePicture || null);
     if (userProfile?.aboutMe) {
       setEditAboutMe(userProfile.aboutMe);
     }
     if (userProfile?.headline) {
       setEditHeadline(userProfile.headline);
     }
+    setEditFirstName(userProfile?.firstName || "");
+    setEditLastName(userProfile?.lastName || "");
     if (userProfile?.resumeFileName) {
       setResumeFileName(userProfile.resumeFileName);
     } else if (userProfile?.resumeUrl) {
@@ -117,7 +120,6 @@ export default function Profile() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
-        aspect: [1, 1],
         quality: 0.8,
         base64: true,
       });
@@ -300,7 +302,38 @@ export default function Profile() {
     }
   };
 
+  const handleUpdateName = async () => {
+    const firstName = editFirstName.trim();
+    const lastName = editLastName.trim();
+
+    if (!firstName) {
+      Alert.alert("Error", "Please enter at least your first name.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.user.updateProfile({ firstName, lastName });
+      await refreshProfile();
+      setAct(null);
+      flash("Name updated!");
+    } catch (error: any) {
+      console.error("Error updating name:", error);
+      Alert.alert("Error", error.message || "Failed to update your name");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const ACTIONS: Act[] = [
+    {
+      key: "name",
+      title: "Update name",
+      body: "Choose how your name appears across the app.",
+      confirm: "Save",
+      cancel: "Cancel",
+      run: handleUpdateName,
+    },
     {
       key: "email",
       title: "Change email",
@@ -430,12 +463,16 @@ export default function Profile() {
   // Helper to get full name or initials
   const fullName =
     [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(" ") ||
-    "User";
+    auth.currentUser?.displayName ||
+    auth.currentUser?.email?.split("@")[0] ||
+    "Your profile";
   const initials =
-    [userProfile?.firstName?.[0], userProfile?.lastName?.[0]]
+    fullName
+      .split(/\s+/)
       .filter(Boolean)
-      .join("")
-      .toUpperCase() || "U";
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "Y";
 
   return (
     <View style={styles.root}>
@@ -748,23 +785,71 @@ export default function Profile() {
               {act && (
                 <>
                   <Text style={styles.sheetTitle}>{act.title}</Text>
-                  {(act.key === "email" || act.key === "password") && (
-                    <TextInput
-                      placeholder={
-                        act.key === "email" ? "you@example.com" : "New password"
-                      }
-                      placeholderTextColor={colors.textFaint}
-                      secureTextEntry={act.key === "password"}
-                      style={styles.input}
-                      value={act.key === "email" ? newEmail : newPassword}
-                      onChangeText={
-                        act.key === "email" ? setNewEmail : setNewPassword
-                      }
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
+                  {act.key === "name" && (
+                    <View style={{ gap: 10, marginTop: 12 }}>
+                      <TextInput
+                        placeholder="First name"
+                        placeholderTextColor={colors.textFaint}
+                        style={styles.input}
+                        value={editFirstName}
+                        onChangeText={setEditFirstName}
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                      />
+                      <TextInput
+                        placeholder="Last name"
+                        placeholderTextColor={colors.textFaint}
+                        style={styles.input}
+                        value={editLastName}
+                        onChangeText={setEditLastName}
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                      />
+                    </View>
                   )}
-                  {act.key !== "email" && act.key !== "password" && (
+                  {(act.key === "email" || act.key === "password") && (
+                    <View style={styles.sheetInputWrap}>
+                      <TextInput
+                        placeholder={
+                          act.key === "email" ? "you@example.com" : "New password"
+                        }
+                        placeholderTextColor={colors.textFaint}
+                        secureTextEntry={
+                          act.key === "password" ? !showAccountPassword : false
+                        }
+                        style={[
+                          styles.input,
+                          act.key === "password" && styles.inputWithAccessory,
+                        ]}
+                        value={act.key === "email" ? newEmail : newPassword}
+                        onChangeText={
+                          act.key === "email" ? setNewEmail : setNewPassword
+                        }
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                      {act.key === "password" && (
+                        <Pressable
+                          style={styles.passwordEye}
+                          onPress={() => setShowAccountPassword((prev) => !prev)}
+                          hitSlop={10}
+                        >
+                          <Ionicons
+                            name={
+                              showAccountPassword
+                                ? "eye-off-outline"
+                                : "eye-outline"
+                            }
+                            size={18}
+                            color={colors.textFaint}
+                          />
+                        </Pressable>
+                      )}
+                    </View>
+                  )}
+                  {act.key !== "email" &&
+                    act.key !== "password" &&
+                    act.key !== "name" && (
                     <Text style={[styles.pText, { marginTop: 6 }]}>
                       {act.body}
                     </Text>
@@ -1092,6 +1177,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  inputWithAccessory: {
+    paddingRight: 44,
+  },
+  sheetInputWrap: {
+    position: "relative",
+  },
+  passwordEye: {
+    position: "absolute",
+    right: 14,
+    top: 29,
   },
   ghost: {
     paddingHorizontal: 20,

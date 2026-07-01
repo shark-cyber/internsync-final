@@ -12,6 +12,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.internsync.app",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -36,6 +37,7 @@
       "expo-router",
       "expo-font",
       "expo-status-bar",
+      "expo-apple-authentication",
       [
         "expo-image-picker",
         {

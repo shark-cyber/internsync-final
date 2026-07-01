@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { Portal } from "./Portal";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
@@ -34,10 +34,13 @@ export function Menu({
   };
 
   // Get display name
-  const displayName = userProfile
-    ? [userProfile.firstName, userProfile.lastName].filter(Boolean).join(" ")
-    : user?.email?.split("@")[0] || "User";
-  const initial = displayName.charAt(0).toUpperCase();
+  const displayName =
+    [userProfile?.firstName, userProfile?.lastName].filter(Boolean).join(" ") ||
+    user?.displayName ||
+    user?.email?.split("@")[0] ||
+    "Your profile";
+  const initial = displayName.trim().charAt(0).toUpperCase() || "Y";
+  const profileImage = userProfile?.profilePicture;
 
   const Row = ({ item }: { item: Item }) => (
     <Pressable
@@ -77,7 +80,11 @@ export function Menu({
             ]}
           >
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initial}</Text>
+              {profileImage ? (
+                <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarText}>{initial}</Text>
+              )}
             </View>
             <Text style={[styles.rowText, styles.rowTextOn]}>
               {displayName}
@@ -131,6 +138,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.18)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 13,
   },
   avatarText: { color: "#fff", fontFamily: font.semibold, fontSize: 11 },
 });

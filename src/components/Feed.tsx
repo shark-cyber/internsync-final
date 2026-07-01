@@ -25,7 +25,6 @@ import { Menu } from "./Menu";
 import { Chip } from "./ui";
 import { Glow } from "./Glow";
 import { api } from "../lib/api";
-import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "expo-router";
 
 // Types for job data
@@ -95,6 +94,7 @@ const filtersFor: Record<Accent, { label: string; opts: string[] }[]> = {
 
 // Persistence helpers
 const getFiltersStorageKey = (accent: Accent) => `internsync-filters-${accent}`;
+const TUTORIAL_STORAGE_KEY = "internsync-feed-tutorial-v1";
 
 const loadSavedFilters = async (
   accent: Accent,
@@ -130,7 +130,6 @@ export default function Feed({
 }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { userProfile } = useAuth();
   const { width } = useWindowDimensions();
   const THRESHOLD = Math.max(90, width * 0.26);
   const [menu, setMenu] = useState(false);
@@ -149,7 +148,7 @@ export default function Feed({
   const [notifications, setNotifications] = useState<Notif[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [limitMessage, setLimitMessage] = useState("");
-  const [resumePromptVisible, setResumePromptVisible] = useState(false);
+  const [tutorialVisible, setTutorialVisible] = useState(false);
   const hasUnread = notifications.some((n) => !n.read);
 
   // Helper to format time
@@ -298,7 +297,14 @@ export default function Feed({
     const init = async () => {
       const saved = await loadSavedFilters(accent);
       setPicked(saved);
-      fetchNextJob(saved);
+      await fetchNextJob(saved);
+
+      if (accent === "internship") {
+        const hasSeenTutorial = await AsyncStorage.getItem(TUTORIAL_STORAGE_KEY);
+        if (!hasSeenTutorial) {
+          setTutorialVisible(true);
+        }
+      }
     };
     init();
   }, [accent]);
@@ -309,51 +315,16 @@ export default function Feed({
     }
   }, [notif]);
 
-  const handleSwipe = async (
-    action: "like" | "dislike" | "superlike" | "skip" | "apply",
-  ) => {
+  const handleSwipe = async (action: "like" | "dislike" | "superlike" | "skip") => {
     if (!currentJob?._id) return;
 
     try {
-      if (action === "apply") {
-        // Check if it's a CSV job or external apply mode
-        const isExternal =
-          currentJob.sourceType === "csv" ||
-          currentJob.applyMode === "external";
-        const cleanSourceUrl = cleanUrl(currentJob.sourceUrl);
-        if (isExternal && cleanSourceUrl) {
-          // Open external URL for CSV/external jobs
-          await Linking.openURL(cleanSourceUrl);
-          // Also mark as "liked" to save it (optional, but helpful)
-          await api.swipe.action(currentJob._id, "like");
-          showToast("Viewing opportunity");
-        } else {
-          console.log("userProfile:", userProfile);
-          // Check if resume is uploaded first for native apply
-          if (!userProfile?.resumeUrl) {
-            setResumePromptVisible(true);
-            resetCardPosition();
-            return;
-          }
-
-          // Create application when applying (swipe right or checkmark button)
-          const applicantName = [userProfile?.firstName, userProfile?.lastName]
-            .filter(Boolean)
-            .join(" ");
-          await api.applications.createApplication(currentJob._id, {
-            applicantName,
-            text: "Applying via swiping!", // Default application text
-            resumeUrl: userProfile.resumeUrl,
-          });
-          showToast("Application Submitted!");
-        }
-      } else {
-        // Use swipe action for save/like/dislike
-        await api.swipe.action(currentJob._id, action);
-        showToast(
-          action === "like" || action === "superlike" ? "Saved" : "Passed",
-        );
-      }
+      await api.swipe.action(currentJob._id, action);
+      showToast(
+        action === "like" || action === "superlike"
+          ? "Saved for later"
+          : "Passed",
+      );
 
       // Reset position and fetch next job
       pos.setValue({ x: 0, y: 0 });
@@ -381,8 +352,17 @@ export default function Feed({
       duration: 280,
       useNativeDriver: true,
     }).start(async () => {
-      await handleSwipe(dir > 0 ? "apply" : "dislike");
+      await handleSwipe(dir > 0 ? "like" : "dislike");
     });
+  };
+
+  const dismissTutorial = async () => {
+    setTutorialVisible(false);
+    try {
+      await AsyncStorage.setItem(TUTORIAL_STORAGE_KEY, "1");
+    } catch (error) {
+      console.error("Failed to save tutorial state:", error);
+    }
   };
 
   const pan = useRef(
@@ -485,20 +465,15 @@ export default function Feed({
             </Text>
           </View>
         ) : (
-          <Pressable style={styles.cardPressable} onPress={() => setInfo(true)}>
-            <Animated.View
-              {...pan.panHandlers}
-              style={[
-                styles.card,
-                {
-                  transform: [
-                    { translateX: pos.x },
-                    { translateY: pos.y },
-                    { rotate },
-                  ],
-                },
-              ]}
-            >
+          <Animated.View
+            {...pan.panHandlers}
+            style={[
+              styles.card,
+              {
+                transform: [{ translateX: pos.x }, { translateY: pos.y }, { rotate }],
+              },
+            ]}
+          >
               {cleanUrl(currentJob.bannerImageUrl) ? (
                 <Image
                   source={{ uri: cleanUrl(currentJob.bannerImageUrl)! }}
@@ -571,8 +546,7 @@ export default function Feed({
                   </Text>
                 </View>
               </View>
-            </Animated.View>
-          </Pressable>
+          </Animated.View>
         )}
       </View>
 
@@ -587,13 +561,13 @@ export default function Feed({
           </Pressable>
           <Pressable
             style={[styles.act, styles.infoBtn]}
-            onPress={() => handleSwipe("like")}
+            onPress={() => setInfo(true)}
           >
             <Ionicons name="add" size={20} color="#fff" />
           </Pressable>
           <Pressable
             style={[styles.act, styles.apply]}
-            onPress={() => handleSwipe("apply")}
+            onPress={() => decide(1)}
           >
             <Ionicons name="checkmark" size={24} color="#fff" />
           </Pressable>
@@ -713,6 +687,12 @@ export default function Feed({
             </Text>
             <Text style={styles.ih}>ABOUT</Text>
             <Text style={styles.ibody}>{displayData.desc}</Text>
+            <Text style={styles.infoHint}>
+              {currentJob.sourceType === "csv" ||
+              currentJob.applyMode === "external"
+                ? "Saved items from external sources can be opened from your Saved tab."
+                : "Save this opportunity now and apply later from your Saved tab."}
+            </Text>
             <Pressable
               style={styles.visit}
               onPress={async () => {
@@ -750,30 +730,32 @@ export default function Feed({
         </View>
       </Sheet>
 
-      {/* Resume Upload Prompt */}
       <Sheet
-        visible={resumePromptVisible}
-        onClose={() => setResumePromptVisible(false)}
-        title="Resume Required"
+        visible={tutorialVisible}
+        onClose={dismissTutorial}
+        title="Quick Tour"
       >
         <Text style={styles.limitBody}>
-          To apply for opportunities, you need to upload your resume first!
+          A few quick tips so the swipe feed feels natural from the start.
         </Text>
+        <View style={styles.tutorialList}>
+          <Text style={styles.tutorialItem}>`X` passes on an opportunity.</Text>
+          <Text style={styles.tutorialItem}>
+            `+` opens more information without leaving the feed.
+          </Text>
+          <Text style={styles.tutorialItem}>
+            `Check` saves every opportunity for later.
+          </Text>
+          <Text style={styles.tutorialItem}>
+            Apply to native internships later from `Saved`.
+          </Text>
+          <Text style={styles.tutorialItem}>
+            External internships from CSV can also be opened from `Saved`.
+          </Text>
+        </View>
         <View style={styles.limitActions}>
-          <Pressable
-            style={styles.reset}
-            onPress={() => setResumePromptVisible(false)}
-          >
-            <Text style={styles.resetText}>Maybe later</Text>
-          </Pressable>
-          <Pressable
-            style={styles.applyBtn}
-            onPress={() => {
-              setResumePromptVisible(false);
-              router.push("/profile");
-            }}
-          >
-            <Text style={styles.applyText}>Upload Resume</Text>
+          <Pressable style={styles.applyBtn} onPress={dismissTutorial}>
+            <Text style={styles.applyText}>Got it</Text>
           </Pressable>
         </View>
       </Sheet>
@@ -842,7 +824,6 @@ const styles = StyleSheet.create({
     borderColor: colors.bg,
   },
   deck: { flex: 1, padding: 16 },
-  cardPressable: { flex: 1 },
   card: {
     flex: 1,
     borderRadius: radius.xl,
@@ -1101,6 +1082,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 21,
   },
+  infoHint: {
+    color: colors.textDim,
+    fontFamily: font.regular,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 14,
+  },
   visit: {
     height: 52,
     borderRadius: radius.pill,
@@ -1112,4 +1100,14 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   visitText: { color: "#fff", fontFamily: font.semibold, fontSize: 14 },
+  tutorialList: {
+    marginTop: 18,
+    gap: 12,
+  },
+  tutorialItem: {
+    color: "rgba(255,255,255,0.8)",
+    fontFamily: font.regular,
+    fontSize: 13,
+    lineHeight: 20,
+  },
 });

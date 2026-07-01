@@ -1,9 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from 'firebase/app';
 import {
   createUserWithEmailAndPassword,
   getAuth,
   getIdToken,
   GoogleAuthProvider,
+  initializeAuth,
   OAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
@@ -15,6 +17,7 @@ import {
   User,
   AuthError,
 } from 'firebase/auth';
+import { Platform } from 'react-native';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -28,7 +31,20 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const getNativePersistence = () => {
+  const authReactNative = require('firebase/auth/react-native') as {
+    getReactNativePersistence: (storage: typeof AsyncStorage) => any;
+  };
+
+  return authReactNative.getReactNativePersistence(AsyncStorage);
+};
+
+const auth =
+  Platform.OS === 'web'
+    ? getAuth(app)
+    : initializeAuth(app, {
+        persistence: getNativePersistence(),
+      });
 
 // Helper to map Firebase auth errors to user-friendly messages
 const getFirebaseErrorMessage = (error: AuthError | Error): string => {
@@ -48,6 +64,12 @@ const getFirebaseErrorMessage = (error: AuthError | Error): string => {
         return 'Incorrect password. Please try again.';
       case 'auth/invalid-credential':
         return 'Invalid credentials. Please check your login details.';
+      case 'auth/app-not-authorized':
+        return 'This mobile app is not authorized for this sign-in provider yet. Please update the mobile auth configuration and try again.';
+      case 'auth/unauthorized-domain':
+        return 'This sign-in domain is not authorized yet. Please contact support or try email/password for now.';
+      case 'auth/invalid-api-key':
+        return 'Authentication is not configured correctly yet. Please contact support or try again later.';
       case 'auth/too-many-requests':
         return 'Too many attempts. Please try again later.';
       case 'auth/popup-closed-by-user':

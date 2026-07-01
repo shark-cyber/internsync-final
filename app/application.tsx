@@ -34,7 +34,7 @@ export default function Application() {
 
   const fullName = [userProfile?.firstName, userProfile?.lastName]
     .filter(Boolean)
-    .join(" ");
+    .join(" ") || "Your name";
 
   const pickCv = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({

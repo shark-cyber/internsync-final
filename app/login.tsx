@@ -56,6 +56,19 @@ export default function Login() {
       scopes: ["profile", "email"],
       responseType: "id_token",
     });
+  const canUseAppleAuth = Platform.OS === "ios" || Platform.OS === "web";
+  const hasNativeGoogleClient =
+    Platform.OS === "ios"
+      ? Boolean(
+          process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
+            process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
+        )
+      : Platform.OS === "android"
+        ? Boolean(
+            process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
+              process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
+          )
+        : true;
 
   useEffect(() => {
     if (!googleResponse) return;
@@ -144,6 +157,12 @@ export default function Login() {
         await syncOrCreateSocialUser(userCredential.user);
         router.replace("/home");
         return;
+      }
+
+      if (!hasNativeGoogleClient) {
+        throw new Error(
+          "Google sign-in for the mobile app is not configured yet. Add the iOS and Android Google client IDs to Expo env variables and rebuild the app.",
+        );
       }
 
       if (!googleRequest) {
@@ -274,9 +293,13 @@ export default function Login() {
           <Pressable
             onPress={() => setShowPw((s) => !s)}
             hitSlop={10}
-            style={styles.forgot}
+            style={styles.eyeButton}
           >
-            <Text style={styles.forgotText}>{showPw ? "Hide" : "Forgot?"}</Text>
+            <Ionicons
+              name={showPw ? "eye-off-outline" : "eye-outline"}
+              size={18}
+              color="rgba(255,255,255,0.85)"
+            />
           </Pressable>
         </View>
 
@@ -306,14 +329,16 @@ export default function Login() {
           <View style={styles.line} />
         </View>
 
-        <Pressable
-          style={styles.social}
-          onPress={handleAppleLogin}
-          disabled={loading}
-        >
-          <Ionicons name="logo-apple" size={18} color="#fff" />
-          <Text style={styles.socialText}>Continue with Apple</Text>
-        </Pressable>
+        {canUseAppleAuth && (
+          <Pressable
+            style={styles.social}
+            onPress={handleAppleLogin}
+            disabled={loading}
+          >
+            <Ionicons name="logo-apple" size={18} color="#fff" />
+            <Text style={styles.socialText}>Continue with Apple</Text>
+          </Pressable>
+        )}
         <Pressable
           style={styles.social}
           onPress={handleGoogleLogin}
@@ -368,11 +393,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingVertical: 8,
   },
-  forgot: { paddingLeft: 10 },
-  forgotText: {
-    color: "rgba(255,255,255,0.85)",
-    fontFamily: font.medium,
-    fontSize: 13,
+  eyeButton: {
+    paddingLeft: 10,
+    paddingVertical: 6,
   },
   remember: {
     flexDirection: "row",

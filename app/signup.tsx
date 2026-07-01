@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -76,6 +76,7 @@ const INTERESTS = [
 export default function Signup() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const codeInputRefs = useRef<Array<TextInput | null>>([]);
   const [i, setI] = useState(0);
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -91,6 +92,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [birthday, setBirthday] = useState({ month: "", day: "", year: "" });
   const [desiredRole, setDesiredRole] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleRequest, googleResponse, promptGoogleAsync] =
     Google.useAuthRequest({
       clientId:
@@ -105,6 +108,19 @@ export default function Signup() {
     });
 
   const step = STEPS[i];
+  const canUseAppleAuth = Platform.OS === "ios" || Platform.OS === "web";
+  const hasNativeGoogleClient =
+    Platform.OS === "ios"
+      ? Boolean(
+          process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
+            process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
+        )
+      : Platform.OS === "android"
+        ? Boolean(
+            process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
+              process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
+          )
+        : true;
   const toggle = (k: string) => setPicked((p) => ({ ...p, [k]: !p[k] }));
   const back = () => (i === 0 ? router.back() : setI(i - 1));
 
@@ -254,7 +270,7 @@ export default function Signup() {
 
       // Step 5: Birthday
       if (step === "birthday") {
-        // Validate birthday is filled and user is at least 16
+        // Validate birthday is filled and user is at least 14
         const { month, day, year } = birthday;
         if (!month || !day || !year) {
           Alert.alert("Invalid Birthday", "Please enter your birthday");
@@ -271,8 +287,8 @@ export default function Signup() {
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
           age--;
         }
-        if (age < 16) {
-          Alert.alert("Too Young", "You must be at least 16 years old");
+        if (age < 14) {
+          Alert.alert("Too Young", "You must be at least 14 years old");
           return;
         }
         setI(i + 1);
@@ -353,10 +369,51 @@ export default function Signup() {
   };
 
   const handleCodeChange = (index: number, value: string) => {
-    if (value.length > 1) return;
+    const sanitized = value.replace(/\D/g, "");
     const newCode = [...code];
-    newCode[index] = value;
+
+    if (!sanitized) {
+      newCode[index] = "";
+      setCode(newCode);
+      return;
+    }
+
+    if (sanitized.length > 1) {
+      const nextCode = [...newCode];
+      sanitized
+        .slice(0, code.length - index)
+        .split("")
+        .forEach((digit, offset) => {
+          nextCode[index + offset] = digit;
+        });
+      setCode(nextCode);
+
+      const nextIndex = Math.min(index + sanitized.length, code.length - 1);
+      codeInputRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    newCode[index] = sanitized;
     setCode(newCode);
+
+    if (index < code.length - 1) {
+      codeInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleCodeKeyPress = (index: number, key: string) => {
+    if (key !== "Backspace") return;
+
+    if (code[index]) {
+      const newCode = [...code];
+      newCode[index] = "";
+      setCode(newCode);
+      return;
+    }
+
+    if (index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
   };
 
   const handleGoogleSignup = async () => {
@@ -373,6 +430,12 @@ export default function Signup() {
         );
         router.replace("/home");
         return;
+      }
+
+      if (!hasNativeGoogleClient) {
+        throw new Error(
+          "Google sign-in for the mobile app is not configured yet. Add the iOS and Android Google client IDs to Expo env variables and rebuild the app.",
+        );
       }
 
       if (!googleRequest) {
@@ -452,7 +515,10 @@ export default function Signup() {
           <Text style={styles.doneSub}>
             Your profile is ready. Let's find opportunities made for you.
           </Text>
-          <Pressable style={styles.cta} onPress={() => router.replace("/home")}>
+          <Pressable
+            style={[styles.cta, styles.doneCta]}
+            onPress={() => router.replace("/home")}
+          >
             <Text style={styles.ctaText}>Get started</Text>
           </Pressable>
         </View>
@@ -501,14 +567,16 @@ export default function Signup() {
               <Text style={styles.or}>or sign up with</Text>
               <View style={styles.line} />
             </View>
-            <Pressable
-              style={styles.social}
-              onPress={handleAppleSignup}
-              disabled={loading}
-            >
-              <Ionicons name="logo-apple" size={18} color="#fff" />
-              <Text style={styles.socialText}>Sign up with Apple</Text>
-            </Pressable>
+            {canUseAppleAuth && (
+              <Pressable
+                style={styles.social}
+                onPress={handleAppleSignup}
+                disabled={loading}
+              >
+                <Ionicons name="logo-apple" size={18} color="#fff" />
+                <Text style={styles.socialText}>Sign up with Apple</Text>
+              </Pressable>
+            )}
             <Pressable
               style={styles.social}
               onPress={handleGoogleSignup}
@@ -529,11 +597,19 @@ export default function Signup() {
               {[0, 1, 2, 3, 4, 5].map((n) => (
                 <TextInput
                   key={n}
+                  ref={(input) => {
+                    codeInputRefs.current[n] = input;
+                  }}
                   style={styles.codeBox}
                   maxLength={1}
                   keyboardType="number-pad"
+                  textContentType="oneTimeCode"
+                  autoComplete="one-time-code"
                   value={code[n]}
                   onChangeText={(val) => handleCodeChange(n, val)}
+                  onKeyPress={({ nativeEvent }) =>
+                    handleCodeKeyPress(n, nativeEvent.key)
+                  }
                   editable={!loading}
                   selectTextOnFocus
                 />
@@ -548,23 +624,45 @@ export default function Signup() {
             sub="Make sure it's at least 6 characters long."
           >
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputWithAccessory]}
               placeholder="Password"
               placeholderTextColor={colors.textFaint}
-              secureTextEntry
+              secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
               editable={!loading}
             />
+            <Pressable
+              style={styles.eyeBtn}
+              onPress={() => setShowPassword((prev) => !prev)}
+              hitSlop={10}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={18}
+                color={colors.textFaint}
+              />
+            </Pressable>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.inputWithAccessory]}
               placeholder="Confirm Password"
               placeholderTextColor={colors.textFaint}
-              secureTextEntry
+              secureTextEntry={!showConfirmPassword}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               editable={!loading}
             />
+            <Pressable
+              style={[styles.eyeBtn, styles.eyeBtnConfirm]}
+              onPress={() => setShowConfirmPassword((prev) => !prev)}
+              hitSlop={10}
+            >
+              <Ionicons
+                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                size={18}
+                color={colors.textFaint}
+              />
+            </Pressable>
           </Field>
         )}
 
@@ -595,7 +693,7 @@ export default function Signup() {
         {step === "birthday" && (
           <Field
             title="When's your birthday?"
-            sub="You must be at least 16. We won't show this publicly."
+            sub="You must be at least 14. We won't show this publicly."
           >
             <View style={{ flexDirection: "row", gap: 10 }}>
               <TextInput
@@ -868,6 +966,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  inputWithAccessory: {
+    paddingRight: 48,
+  },
   codeRow: { flexDirection: "row", gap: 9 },
   codeBox: {
     flex: 1,
@@ -907,11 +1008,24 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "stretch",
     backgroundColor: colors.surface2,
     borderWidth: 1,
     borderColor: colors.borderStrong,
   },
+  doneCta: {
+    width: "100%",
+    maxWidth: 320,
+  },
   ctaText: { color: "#fff", fontFamily: font.bold, fontSize: 15 },
+  eyeBtn: {
+    position: "absolute",
+    top: 18,
+    right: 16,
+  },
+  eyeBtnConfirm: {
+    top: 85,
+  },
   fine: {
     color: colors.textFaint,
     fontFamily: font.regular,
